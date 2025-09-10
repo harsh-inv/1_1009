@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 from pydantic import BaseModel
 import json
+import re 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,16 +22,16 @@ app = FastAPI(
     title="Data Quality Checker API",
     description="API for running data quality checks on SQLite databases",
     version="1.0.0"
-)
+)  
 
 # Enable CORS for all origins (adjust for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)  
 
 # Simplified classes from the original code (without UI elements)
 class DataQualityChecker:
@@ -402,7 +403,8 @@ async def connect_database(db_path: str = Form(...)):
         # In production, you might want to use a persistent volume or cloud database
         
         # Create a temporary database file
-        temp_db_path = f"/tmp/database_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+        temp_db_path = tempfile.mktemp(suffix='.db')
+
         
         # If db_path is a URL or path to an existing database, handle accordingly
         # For now, create a new connection
@@ -660,5 +662,6 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 

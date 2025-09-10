@@ -551,7 +551,6 @@ async def get_database_schema():
         tables = cursor.fetchall()
         
         schema_info = []
-        
         for table in tables:
             table_name = table[0]
             cursor.execute(f"PRAGMA table_info({table_name});")
@@ -562,7 +561,7 @@ async def get_database_schema():
                 column_info.append({
                     "name": col[1],
                     "type": col[2],
-                    "not_null": bool(col[3]),
+                    "nullable": not bool(col[3]),  # Fixed: renamed and inverted logic
                     "default_value": col[4],
                     "primary_key": bool(col[5])
                 })
@@ -576,7 +575,7 @@ async def get_database_schema():
             "schema": schema_info,
             "total_tables": len(schema_info)
         }
-    
+        
     except Exception as e:
         logger.error(f"Error getting database schema: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting schema: {str(e)}")
@@ -661,4 +660,5 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
 
